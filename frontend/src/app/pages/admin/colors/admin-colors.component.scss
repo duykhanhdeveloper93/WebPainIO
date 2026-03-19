@@ -1,0 +1,11 @@
+.colors-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:16px;margin-top:8px; }
+.color-item { background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05); }
+.color-swatch { height:90px;position:relative;display:flex;align-items:flex-start;justify-content:flex-end;padding:8px; }
+.swatch-actions { display:flex;gap:4px;opacity:0;transition:opacity .2s; }
+.color-swatch:hover .swatch-actions { opacity:1; }
+.swatch-actions button { width:28px;height:28px;border:none;border-radius:6px;background:rgba(255,255,255,.9);cursor:pointer;font-size:.8rem; }
+.trending-tag { position:absolute;bottom:6px;left:8px;font-size:.8rem; }
+.color-meta { padding:8px 10px; }
+.color-code { display:block;font-size:.68rem;font-weight:700;letter-spacing:1px;color:#C8102E; }
+.color-name { display:block;font-size:.78rem;font-weight:600;color:#1a1a1a;margin:2px 0; }
+.color-family { display:block;font-size:.7rem;color:#888; }

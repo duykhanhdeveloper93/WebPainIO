@@ -1,0 +1,83 @@
+<header class="header" [class.scrolled]="scrolled()">
+  <div class="container">
+    <div class="header-inner">
+
+      <!-- Logo -->
+      <a routerLink="/" class="logo" (click)="closeMobile()">
+        <div class="logo-icon"><span>P</span></div>
+        <div class="logo-text">
+          <span class="logo-brand">PaintCo</span>
+          <span class="logo-tagline">Số 1 Châu Á</span>
+        </div>
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="nav-desktop">
+        <a *ngFor="let item of navItems"
+           [routerLink]="item.path"
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{exact: item.path === '/'}"
+           class="nav-link">
+          {{ item.label }}
+        </a>
+      </nav>
+
+      <!-- Right actions -->
+      <div class="header-actions">
+        <a routerLink="/lien-he" class="btn btn-primary btn-sm cta-btn" (click)="closeMobile()">
+          Tư vấn miễn phí
+        </a>
+        <button class="hamburger"
+                (click)="toggleMobile()"
+                [class.open]="mobileOpen()"
+                aria-label="Mở menu"
+                [attr.aria-expanded]="mobileOpen()">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Dark overlay (mobile only) — click to close -->
+<div class="menu-overlay" [class.visible]="mobileOpen()" (click)="closeMobile()"></div>
+
+<!-- Mobile menu drawer -->
+<div class="mobile-menu" [class.open]="mobileOpen()">
+  <!-- Menu header -->
+  <div class="mobile-menu-header">
+    <div class="logo">
+      <div class="logo-icon"><span>P</span></div>
+      <span class="logo-brand">PaintCo</span>
+    </div>
+    <button class="menu-close-btn" (click)="closeMobile()" aria-label="Đóng menu">
+      &#10005;
+    </button>
+  </div>
+
+  <!-- Nav links -->
+  <nav>
+    <a *ngFor="let item of navItems"
+       [routerLink]="item.path"
+       routerLinkActive="active"
+       [routerLinkActiveOptions]="{exact: item.path === '/'}"
+       class="mobile-link"
+       (click)="closeMobile()">
+      {{ item.label }}
+    </a>
+  </nav>
+
+  <!-- CTA -->
+  <div class="mobile-cta">
+    <a routerLink="/lien-he" class="btn btn-primary" style="width:100%;justify-content:center" (click)="closeMobile()">
+      Tư vấn miễn phí
+    </a>
+    <a routerLink="/admin" class="admin-link" (click)="closeMobile()">
+      🔧 Quản trị
+    </a>
+  </div>
+</div>
+
+<div class="header-spacer"></div>

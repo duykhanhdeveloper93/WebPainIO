@@ -1,0 +1,45 @@
+<div class="admin-page">
+  <div class="page-header">
+    <div>
+      <h2>Quản lý Liên hệ</h2>
+      <p>{{ contacts().length }} liên hệ · {{ unreplied() }} chưa trả lời</p>
+    </div>
+  </div>
+  <div class="table-card">
+    <div *ngIf="loading()" class="loading-state">Đang tải...</div>
+    <table *ngIf="!loading()">
+      <thead>
+        <tr>
+          <th>Người gửi</th><th>Email</th><th>Chủ đề</th>
+          <th>Nội dung</th><th>Thời gian</th><th>Trạng thái</th><th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of contacts()" [class.unread-row]="!c.replied">
+          <td>
+            <div class="sender-cell">
+              <div class="sender-avatar">{{ c.name[0] }}</div>
+              <strong>{{ c.name }}</strong>
+            </div>
+          </td>
+          <td style="font-size:.82rem">{{ c.email }}<br><span style="color:#888">{{ c.phone }}</span></td>
+          <td><span class="tag">{{ c.subject || 'Chung' }}</span></td>
+          <td><div class="msg-preview">{{ c.message }}</div></td>
+          <td style="font-size:.78rem;color:#888;white-space:nowrap">{{ c.createdAt | date:'dd/MM/yy HH:mm' }}</td>
+          <td>
+            <span class="badge" [class.active]="c.replied">
+              {{ c.replied ? '✅ Đã trả lời' : '🔴 Mới' }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="btn-edit" *ngIf="!c.replied" (click)="markReplied(c.id)">✅ Đánh dấu</button>
+            <a [href]="'mailto:'+c.email" class="btn-edit" style="text-decoration:none">✉️ Email</a>
+          </td>
+        </tr>
+        <tr *ngIf="contacts().length === 0">
+          <td colspan="7" class="empty">Chưa có liên hệ nào</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

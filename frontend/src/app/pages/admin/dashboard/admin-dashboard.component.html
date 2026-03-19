@@ -1,0 +1,64 @@
+<div class="dashboard">
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let s of stats()">
+      <div class="stat-icon" [style.background]="s.bg">{{ s.icon }}</div>
+      <div class="stat-body">
+        <div class="stat-value">{{ s.value }}</div>
+        <div class="stat-label">{{ s.label }}</div>
+      </div>
+      <a [routerLink]="s.link" class="stat-arrow">→</a>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <!-- Recent products -->
+    <div class="dash-card">
+      <div class="card-header">
+        <h3>Sản phẩm mới nhất</h3>
+        <a routerLink="/admin/products" class="card-link">Xem tất cả →</a>
+      </div>
+      <div class="item-list">
+        <div *ngFor="let p of recentProducts()" class="list-item">
+          <img [src]="p.imageUrl" [alt]="p.nameVi" class="item-thumb">
+          <div class="item-info">
+            <div class="item-name">{{ p.nameVi || p.name }}</div>
+            <div class="item-sub">{{ p.category?.nameVi || 'Sơn cao cấp' }}</div>
+          </div>
+          <span class="item-badge" [class.active]="p.isActive">{{ p.isActive ? 'Hiện' : 'Ẩn' }}</span>
+        </div>
+        <div *ngIf="recentProducts().length === 0" class="empty-msg">Chưa có sản phẩm</div>
+      </div>
+    </div>
+
+    <!-- Recent contacts -->
+    <div class="dash-card">
+      <div class="card-header">
+        <h3>Liên hệ mới nhất</h3>
+        <a routerLink="/admin/contacts" class="card-link">Xem tất cả →</a>
+      </div>
+      <div class="item-list">
+        <div *ngFor="let c of recentContacts()" class="list-item">
+          <div class="contact-avatar">{{ c.name[0] }}</div>
+          <div class="item-info">
+            <div class="item-name">{{ c.name }}</div>
+            <div class="item-sub">{{ c.email }}</div>
+          </div>
+          <span class="item-badge" [class.replied]="c.replied">{{ c.replied ? 'Đã trả lời' : 'Mới' }}</span>
+        </div>
+        <div *ngIf="recentContacts().length === 0" class="empty-msg">Chưa có liên hệ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="dash-card" style="margin-top:24px">
+    <div class="card-header"><h3>Thao tác nhanh</h3></div>
+    <div class="quick-actions">
+      <a routerLink="/admin/products" class="quick-btn q-red">➕ Thêm sản phẩm</a>
+      <a routerLink="/admin/colors"   class="quick-btn q-gold">🎨 Thêm màu sắc</a>
+      <a routerLink="/admin/news"     class="quick-btn q-blue">📝 Viết bài mới</a>
+      <a href="/api/docs" target="_blank" class="quick-btn q-green">📚 Swagger API</a>
+    </div>
+  </div>
+</div>

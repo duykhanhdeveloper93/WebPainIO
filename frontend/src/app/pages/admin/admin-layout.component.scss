@@ -1,0 +1,165 @@
+.admin-shell {
+  display: flex; min-height: 100vh; background: #f4f5f7;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 240px; background: #111118; display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 200;
+  transition: width 0.3s cubic-bezier(.4,0,.2,1);
+  &.collapsed { width: 68px; }
+}
+
+.sidebar-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,.06);
+  min-height: 68px;
+}
+.logo {
+  display: flex; align-items: center; gap: 10px; overflow: hidden;
+}
+.logo-icon {
+  width: 36px; height: 36px; background: #C8102E; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  span { color: white; font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 900; }
+}
+.logo-text {
+  font-size: .85rem; font-weight: 700; color: white; white-space: nowrap; overflow: hidden;
+}
+.collapse-btn {
+  background: none; border: none; color: rgba(255,255,255,.4); cursor: pointer;
+  padding: 6px; border-radius: 6px; flex-shrink: 0;
+  &:hover { background: rgba(255,255,255,.08); color: white; }
+}
+
+.sidebar-nav {
+  flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px;
+  color: rgba(255,255,255,.55); text-decoration: none; transition: all .2s;
+  white-space: nowrap; overflow: hidden; position: relative;
+  &:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.9); }
+  &.active { background: rgba(200,16,46,.2); color: #ff6b7a; }
+  &.active .nav-icon svg { stroke: #ff6b7a; }
+}
+.nav-icon { flex-shrink: 0; display: flex; align-items: center; width: 18px; }
+.nav-label { font-size: .875rem; font-weight: 500; }
+.nav-badge {
+  margin-left: auto; background: #C8102E; color: white;
+  font-size: .65rem; font-weight: 700; padding: 2px 6px; border-radius: 50px;
+}
+
+.sidebar-footer {
+  padding: 12px 8px; border-top: 1px solid rgba(255,255,255,.06);
+}
+.user-info {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; margin-bottom: 4px;
+}
+.user-avatar {
+  width: 32px; height: 32px; background: #C8102E; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: .85rem;
+}
+.user-name { font-size: .82rem; font-weight: 600; color: white; }
+.user-role { font-size: .7rem; color: rgba(255,255,255,.4); text-transform: capitalize; }
+.logout-btn {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 12px; background: none; border: none; border-radius: 10px;
+  color: rgba(255,255,255,.4); cursor: pointer; font-size: .875rem; transition: all .2s;
+  &:hover { background: rgba(200,16,46,.15); color: #ff6b7a; }
+}
+
+/* ===== MAIN ===== */
+.admin-main {
+  flex: 1; margin-left: 240px; transition: margin-left .3s;
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+.sidebar.collapsed ~ .admin-main { margin-left: 68px; }
+
+.admin-topbar {
+  background: white; border-bottom: 1px solid #e8e8e8;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 64px; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 8px rgba(0,0,0,.04);
+}
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.mobile-menu-btn {
+  background: none; border: none; cursor: pointer; padding: 6px;
+  border-radius: 8px; color: #666;
+  &:hover { background: #f0f0f0; }
+  display: none;
+}
+.page-title { font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin: 0; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.view-site-btn {
+  display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+  border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: .8rem;
+  font-weight: 600; color: #555; text-decoration: none; transition: all .2s;
+  &:hover { border-color: #C8102E; color: #C8102E; }
+}
+.topbar-avatar {
+  width: 36px; height: 36px; background: #C8102E; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: .9rem;
+}
+
+.admin-content { flex: 1; padding: 28px; overflow-y: auto; }
+
+@media (max-width: 768px) {
+  .mobile-menu-btn { display: flex; }
+  .sidebar { transform: translateX(-100%); &:not(.collapsed) { transform: none; } }
+  .admin-main { margin-left: 0 !important; }
+}
+
+.nav-badge {
+  margin-left: auto; background: #C8102E; color: white;
+  font-size: .62rem; font-weight: 700; padding: 2px 7px;
+  border-radius: 50px; min-width: 18px; text-align: center;
+}
+.nav-dot {
+  position: absolute; top: 8px; right: 8px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #C8102E; box-shadow: 0 0 6px #C8102E;
+}
+.nav-item { position: relative; }
+
+/* ─── Full Responsive Admin ─── */
+
+/* Tablet 769–1024px: sidebar collapse by default */
+@media (max-width: 1024px) {
+  .sidebar { width: 68px; }
+  .logo-text, .nav-label, .nav-badge, .user-info, .logout-btn span:last-child { display: none !important; }
+  .admin-main { margin-left: 68px; }
+  .admin-content { padding: 20px 16px; }
+}
+
+/* Mobile < 768px: sidebar hidden, hamburger shows */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 260px !important;
+    transition: transform 0.3s ease, width 0.3s ease;
+    z-index: 1100;
+    &.collapsed { transform: translateX(-100%) !important; }
+  }
+  /* When sidebar open on mobile */
+  .sidebar:not(.collapsed) {
+    transform: translateX(0) !important;
+    .logo-text, .nav-label, .user-info { display: flex !important; }
+    .nav-label { display: block !important; }
+    .user-info { display: flex !important; }
+  }
+  .admin-main { margin-left: 0 !important; }
+  .hamburger { display: flex !important; }
+  .page-title { font-size: 0.95rem; }
+  .view-site-btn span { display: none; }
+  .admin-content { padding: 16px 12px; }
+}
+
+/* Small mobile < 480px */
+@media (max-width: 480px) {
+  .admin-topbar { padding: 0 12px; height: 56px; }
+  .admin-content { padding: 12px 10px; }
+}

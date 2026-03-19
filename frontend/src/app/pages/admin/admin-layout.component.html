@@ -1,0 +1,61 @@
+<div class="admin-shell">
+
+  <aside class="sidebar" [class.collapsed]="isCollapsed()">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon"><span>P</span></div>
+        <span class="logo-text" *ngIf="!isCollapsed()">PaintCo Admin</span>
+      </div>
+      <button class="collapse-btn" (click)="toggleSidebar()">
+        <span *ngIf="isCollapsed()">&#8594;</span>
+        <span *ngIf="!isCollapsed()">&#8592;</span>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a *ngFor="let item of navItems"
+         [routerLink]="item.path"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: item.exact}"
+         class="nav-item">
+        <span class="nav-icon">{{ navIcons[item.label] }}</span>
+        <span class="nav-label" *ngIf="!isCollapsed()">{{ navLabelsVi[item.label] }}</span>
+        <span class="nav-badge" *ngIf="item.label === 'Chat' && getChatUnread() > 0 && !isCollapsed()">
+          {{ getChatUnread() }}
+        </span>
+        <span class="nav-dot" *ngIf="item.label === 'Chat' && getChatUnread() > 0 && isCollapsed()"></span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info" *ngIf="!isCollapsed()">
+        <div class="user-avatar">{{ userInitial() }}</div>
+        <div>
+          <div class="user-name">{{ getUserName() }}</div>
+          <div class="user-role">{{ getUserRole() }}</div>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        <span>&#128682;</span>
+        <span *ngIf="!isCollapsed()">&#272;&#259;ng xu&#7845;t</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="admin-main" [class.expanded]="isCollapsed()">
+    <header class="admin-topbar">
+      <div class="topbar-left">
+        <button class="hamburger" (click)="toggleSidebar()">&#9776;</button>
+        <h1 class="page-title">{{ currentTitle() }}</h1>
+      </div>
+      <div class="topbar-right">
+        <a href="/" target="_blank" class="view-site-btn">&#127760; Website</a>
+        <div class="topbar-avatar">{{ userInitial() }}</div>
+      </div>
+    </header>
+    <main class="admin-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+</div>

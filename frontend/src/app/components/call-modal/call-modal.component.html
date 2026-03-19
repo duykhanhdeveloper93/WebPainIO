@@ -1,0 +1,132 @@
+<!-- ═══════════════════════════════════════
+     INCOMING CALL TOAST  (z-index cao nhất, không bị che)
+════════════════════════════════════════ -->
+<div class="incoming-toast" *ngIf="rtc.callState() === 'incoming' && rtc.incomingCall()">
+  <div class="inc-avatar">
+    <img src="https://api.dicebear.com/7.x/thumbs/svg?seed=customer&backgroundColor=c8102e" alt="avatar">
+  </div>
+  <div class="inc-info">
+    <div class="inc-label">&#128222; Cuộc gọi đến</div>
+    <div class="inc-name">{{ rtc.incomingCall()!.callerName }}</div>
+    <div class="inc-type">{{ rtc.callType() === 'video' ? '📹 Video call' : '📞 Gọi thoại' }}</div>
+  </div>
+  <div class="inc-actions">
+    <button class="inc-reject" (click)="rejectCall()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M22.71 16.67a1 1 0 00-.14-1.38l-3.47-2.84a1 1 0 00-1.28.07l-1.61 1.61a.85.85 0 01-1 .13 12.81 12.81 0 01-4.49-4.49.85.85 0 01.13-1l1.61-1.61a1 1 0 00.07-1.28L9.7 2.41a1 1 0 00-1.38-.14A9.9 9.9 0 003 11c0 5.52 4.48 10 10 10a9.9 9.9 0 008.71-4.33z"/></svg>
+      Từ chối
+    </button>
+    <button class="inc-accept" (click)="acceptCall()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.01L6.6 10.8z"/></svg>
+      Nhận
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     OUTGOING — RINGING OVERLAY (caller side)
+     Tách riêng khỏi call-modal để không che toast
+════════════════════════════════════════ -->
+<div class="calling-overlay" *ngIf="rtc.callState() === 'calling'">
+  <div class="calling-box">
+    <div class="calling-avatar">
+      <img src="https://api.dicebear.com/7.x/thumbs/svg?seed=admin&backgroundColor=111827" alt="avatar">
+      <div class="ring ring1"></div>
+      <div class="ring ring2"></div>
+      <div class="ring ring3"></div>
+    </div>
+    <div class="calling-name">{{ myName }}</div>
+    <div class="calling-label">&#128222; Đang gọi...</div>
+    <button class="cancel-call-btn" (click)="cancelCall()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M22.71 16.67a1 1 0 00-.14-1.38l-3.47-2.84a1 1 0 00-1.28.07l-1.61 1.61a.85.85 0 01-1 .13 12.81 12.81 0 01-4.49-4.49.85.85 0 01.13-1l1.61-1.61a1 1 0 00.07-1.28L9.7 2.41a1 1 0 00-1.38-.14A9.9 9.9 0 003 11c0 5.52 4.48 10 10 10a9.9 9.9 0 008.71-4.33z"/></svg>
+      Hủy cuộc gọi
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ACTIVE CALL MODAL (connecting / connected / ended)
+════════════════════════════════════════ -->
+<div class="call-modal" *ngIf="rtc.callState() === 'connecting' || rtc.callState() === 'connected' || rtc.callState() === 'ended'">
+  <div class="call-overlay" (click)="minimise()"></div>
+  <div class="call-box" [class.audio-only]="!isVideoCall()" *ngIf="!showCallBar()">
+
+    <!-- Top bar -->
+    <div class="call-topbar">
+      <div class="call-status-row">
+        <span class="status-dot" [class.active]="rtc.callState() === 'connected'"></span>
+        <span class="status-text">
+          {{ rtc.callState() === 'connecting' ? 'Đang kết nối...' :
+             rtc.callState() === 'connected'  ? rtc.formatDuration(rtc.callDuration()) :
+             'Cuộc gọi đã kết thúc' }}
+        </span>
+        <div class="quality-bars" *ngIf="rtc.callState() === 'connected'">
+          <span [class]="'q-' + rtc.networkQuality()">
+            <i></i><i></i><i></i>
+          </span>
+        </div>
+      </div>
+      <button class="minimise-btn" (click)="minimise()">&#8722;</button>
+    </div>
+
+    <!-- VIDEO area -->
+    <div class="video-area" *ngIf="isVideoCall()">
+      <video #remoteVideo class="remote-video" autoplay playsinline></video>
+      <div class="remote-placeholder" *ngIf="rtc.callState() !== 'connected'">
+        <div class="ph-avatar">
+          <img src="https://api.dicebear.com/7.x/thumbs/svg?seed=user&backgroundColor=c8102e" alt="avatar">
+        </div>
+        <div class="ph-label">Đang kết nối...</div>
+      </div>
+      <div class="pip-wrap" [class.cam-off]="rtc.isCamOff()">
+        <video #localVideo class="local-video" autoplay playsinline muted></video>
+        <div class="pip-off" *ngIf="rtc.isCamOff()">📷 Tắt</div>
+        <div class="screen-badge" *ngIf="rtc.isScreenSharing()">🖥️</div>
+      </div>
+    </div>
+
+    <!-- AUDIO only area -->
+    <div class="audio-area" *ngIf="!isVideoCall()">
+      <div class="audio-avatar-wrap">
+        <div class="audio-avatar" [class.talking]="rtc.callState() === 'connected' && !rtc.isMuted()">
+          <img src="https://api.dicebear.com/7.x/thumbs/svg?seed=support&backgroundColor=c8102e" alt="avatar">
+        </div>
+        <div class="talk-rings" *ngIf="rtc.callState() === 'connected' && !rtc.isMuted()">
+          <div class="tr tr1"></div><div class="tr tr2"></div>
+        </div>
+      </div>
+      <div class="audio-name">PaintCo Support</div>
+      <div class="audio-status">{{ rtc.callState() === 'connected' ? rtc.formatDuration(rtc.callDuration()) : 'Đang kết nối...' }}</div>
+      <!-- hidden audio elements -->
+      <audio #remoteVideo autoplay></audio>
+      <audio #localVideo autoplay muted></audio>
+    </div>
+
+    <!-- Controls -->
+    <div class="call-controls">
+      <button class="ctrl" [class.off]="rtc.isMuted()" (click)="toggleMute()">
+        <span>{{ rtc.isMuted() ? '🔇' : '🎙️' }}</span>
+        <div>{{ rtc.isMuted() ? 'Bật mic' : 'Tắt mic' }}</div>
+      </button>
+      <button class="ctrl" *ngIf="isVideoCall()" [class.off]="rtc.isCamOff()" (click)="toggleCam()">
+        <span>{{ rtc.isCamOff() ? '📷' : '📸' }}</span>
+        <div>{{ rtc.isCamOff() ? 'Bật cam' : 'Tắt cam' }}</div>
+      </button>
+      <button class="ctrl" *ngIf="isVideoCall()" [class.on]="rtc.isScreenSharing()" (click)="toggleScreen()">
+        <span>🖥️</span>
+        <div>{{ rtc.isScreenSharing() ? 'Dừng' : 'Màn hình' }}</div>
+      </button>
+      <button class="ctrl hangup" (click)="hangup()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M22.71 16.67a1 1 0 00-.14-1.38l-3.47-2.84a1 1 0 00-1.28.07l-1.61 1.61a.85.85 0 01-1 .13 12.81 12.81 0 01-4.49-4.49.85.85 0 01.13-1l1.61-1.61a1 1 0 00.07-1.28L9.7 2.41a1 1 0 00-1.38-.14A9.9 9.9 0 003 11c0 5.52 4.48 10 10 10a9.9 9.9 0 008.71-4.33z"/></svg>
+        <div>Kết thúc</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Minimised bar -->
+<div class="mini-bar" *ngIf="showCallBar() && isActive()">
+  <span>{{ isVideoCall() ? '📹' : '📞' }}</span>
+  <span class="mini-time">{{ rtc.formatDuration(rtc.callDuration()) }}</span>
+  <button class="mini-expand" (click)="maximise()">&#9633;</button>
+  <button class="mini-end" (click)="hangup()">&#128222;</button>
+</div>

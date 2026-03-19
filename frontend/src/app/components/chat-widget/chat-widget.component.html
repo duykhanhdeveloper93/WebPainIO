@@ -1,0 +1,201 @@
+<!-- ═══ FAB Button ═══ -->
+<button class="chat-fab" (click)="toggleChat()" [class.open]="isOpen()">
+  <svg *ngIf="!isOpen()" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+  </svg>
+  <svg *ngIf="isOpen()" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+</button>
+
+<!-- ═══ Chat Window ═══ -->
+<div class="chat-window" *ngIf="isOpen()">
+
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="header-info">
+      <div class="agent-av">P</div>
+      <div>
+        <div class="agent-name">PaintCo Support</div>
+        <div class="agent-status">
+          <span class="dot" [class.online]="chat.isConnected() && !chat.sessionClosed()"></span>
+          <span *ngIf="chat.sessionClosed()" class="closed-tag">Phiên đã kết thúc</span>
+          <span *ngIf="!chat.sessionClosed()">{{ chat.isConnected() ? 'Trực tuyến' : 'Đang kết nối...' }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="hdr-btns">
+      <button class="hdr-btn" (click)="startAudioCall()"
+              [class.hdr-btn-off]="showForm() || chat.sessionClosed()"
+              [disabled]="showForm() || chat.sessionClosed()"
+              title="Gọi thoại">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.01L6.6 10.8z"/>
+        </svg>
+      </button>
+      <button class="hdr-btn" (click)="startVideoCall()"
+              [class.hdr-btn-off]="showForm() || chat.sessionClosed()"
+              [disabled]="showForm() || chat.sessionClosed()"
+              title="Video call">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+        </svg>
+      </button>
+      <button class="hdr-close" *ngIf="!showForm()" (click)="endChat()" title="Kết thúc">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Start form -->
+  <div class="chat-form" *ngIf="showForm()">
+    <div class="welcome">
+      <div class="welcome-ico">&#128075;</div>
+      <h3>Xin chào! Chúng tôi có thể giúp gì?</h3>
+      <p>Để lại thông tin để bắt đầu trò chuyện với chuyên gia PaintCo.</p>
+    </div>
+    <div class="fg"><label>Họ và tên *</label><input [(ngModel)]="name" placeholder="Nguyễn Văn A" (keyup.enter)="startChat()"></div>
+    <div class="fg"><label>Email (không bắt buộc)</label><input type="email" [(ngModel)]="email" placeholder="email@example.com"></div>
+    <button class="start-btn" (click)="startChat()" [disabled]="!name.trim()">Bắt đầu trò chuyện &#128640;</button>
+  </div>
+
+  <!-- Messages -->
+  <div class="chat-body" *ngIf="!showForm()" #msgContainer>
+    <div class="intro-msg" *ngIf="chat.messages().length === 0 && !chat.sessionClosed()">
+      &#128075; Xin chào <strong>{{ name }}</strong>! Hãy đặt câu hỏi, chúng tôi sẵn sàng tư vấn!
+    </div>
+
+    <div *ngFor="let msg of chat.messages()" class="msg-row"
+         [class.msg-me]="isMe(msg)" [class.msg-them]="!isMe(msg)">
+      <div class="msg-av" *ngIf="!isMe(msg)">P</div>
+      <div class="msg-bubble">
+        <div class="msg-text"    *ngIf="msg.msgType === 'text'">{{ msg.message }}</div>
+        <div class="msg-emoji"   *ngIf="msg.msgType === 'emoji'">{{ msg.message }}</div>
+        <div class="msg-sticker" *ngIf="msg.msgType === 'sticker'">
+          <img [src]="msg.fileUrl" [alt]="msg.message" loading="lazy">
+          <span>{{ msg.message }}</span>
+        </div>
+        <div class="msg-image" *ngIf="msg.msgType === 'image'">
+          <a [href]="msg.fileUrl" target="_blank"><img [src]="msg.fileUrl" [alt]="msg.fileName" loading="lazy"></a>
+        </div>
+        <a class="msg-file" *ngIf="msg.msgType === 'file'" [href]="msg.fileUrl" target="_blank" download>
+          <span class="file-ico">&#128196;</span>
+          <div class="file-info"><div class="file-name">{{ msg.fileName }}</div><div class="file-size">{{ formatSize(msg.fileSize) }}</div></div>
+          <span class="file-dl">&#11015;</span>
+        </a>
+        <div class="msg-time">{{ msg.createdAt | date:'HH:mm' }}</div>
+      </div>
+    </div>
+
+    <!-- Typing indicator -->
+    <div class="msg-row msg-them" *ngIf="chat.isTyping() && !chat.sessionClosed()">
+      <div class="msg-av">P</div>
+      <div class="msg-bubble">
+        <div class="typing"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+
+    <!-- Session closed notice -->
+    <div class="session-ended-notice" *ngIf="chat.sessionClosed()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      Phiên chat đã kết thúc bởi admin
+      <button class="new-chat-btn" (click)="startNewChat()">Bắt đầu cuộc trò chuyện mới</button>
+    </div>
+
+    <!-- Upload progress -->
+    <div class="upload-progress" *ngIf="uploading()">
+      <div class="up-anim"></div>
+      <span>Đang tải lên...</span>
+    </div>
+  </div>
+
+  <!-- Emoji panel -->
+  <div class="emoji-panel" *ngIf="showEmoji() && !chat.sessionClosed()">
+    <div class="panel-tabs">
+      <span class="panel-title">&#128512; Emoji</span>
+      <button class="panel-close" (click)="closePanel('emoji')">&#10005;</button>
+    </div>
+    <div class="emoji-grid">
+      <button *ngFor="let e of emojis" (click)="sendEmoji(e)" class="emoji-btn">{{ e }}</button>
+    </div>
+  </div>
+
+  <!-- Sticker panel -->
+  <div class="sticker-panel" *ngIf="showSticker() && !chat.sessionClosed()">
+    <div class="panel-tabs">
+      <span class="panel-title">&#127752; Sticker & GIF</span>
+      <button class="panel-close" (click)="closePanel('sticker')">&#10005;</button>
+    </div>
+    <div class="sticker-grid">
+      <div *ngFor="let s of stickers" class="sticker-item" (click)="sendSticker(s)">
+        <img [src]="s.url" [alt]="s.label" loading="lazy">
+        <span>{{ s.label }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input area (locked when session closed) -->
+  <div class="chat-input" *ngIf="!showForm()">
+
+    <!-- Locked state -->
+    <div class="input-locked" *ngIf="chat.sessionClosed()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0110 0v4"/>
+      </svg>
+      Phiên chat đã kết thúc
+    </div>
+
+    <!-- Active toolbar -->
+    <div class="toolbar" *ngIf="!chat.sessionClosed()">
+      <!-- Emoji -->
+      <button class="tool-btn" (click)="closePanel('emoji')" [class.active]="showEmoji()" title="Emoji">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+          <line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+        </svg>
+      </button>
+      <!-- Sticker / GIF — nút riêng đẹp hơn -->
+      <button class="tool-btn sticker-btn" (click)="closePanel('sticker')" [class.active]="showSticker()" title="Sticker & GIF">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.19 0 2-.81 2-2v-.19c0-.53-.21-1.03-.58-1.41-.36-.37-.57-.87-.57-1.4C12.85 16 13.79 15 15 15h2c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8z"/>
+          <circle cx="8.5" cy="11.5" r="1.5" fill="currentColor"/>
+          <circle cx="12.5" cy="8.5" r="1.5" fill="currentColor"/>
+          <circle cx="16.5" cy="11.5" r="1.5" fill="currentColor"/>
+        </svg>
+      </button>
+      <!-- File -->
+      <button class="tool-btn" (click)="triggerFileInput()" title="Gửi file / ảnh">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+        </svg>
+      </button>
+      <input type="file" #fileInput class="hidden-file" (change)="onFileSelected($event)"
+             accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip">
+    </div>
+
+    <!-- Text input -->
+    <div class="input-row" *ngIf="!chat.sessionClosed()">
+      <textarea [(ngModel)]="input"
+                placeholder="Nhập tin nhắn... (Enter để gửi)"
+                rows="1"
+                (keydown)="onKeydown($event)">
+      </textarea>
+      <button class="send-btn" (click)="send()" [disabled]="!input.trim()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Call modal -->
+<app-call-modal [sessionId]="sessionId" [myName]="name" role="customer"></app-call-modal>

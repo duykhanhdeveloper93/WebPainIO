@@ -1,0 +1,211 @@
+<!-- ===== HERO SLIDER ===== -->
+<section class="hero">
+  <div class="hero-slides">
+    <div *ngFor="let slide of slides; let i = index"
+         class="hero-slide"
+         [class.active]="activeSlide() === i"
+         [style.background]="slide.bg">
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-text">
+            <span class="hero-label">{{ slide.label }}</span>
+            <h1 class="hero-title">{{ slide.title }}</h1>
+            <p class="hero-desc">{{ slide.desc }}</p>
+            <div class="hero-actions">
+              <a routerLink="/san-pham" class="btn btn-primary">{{ slide.cta }}</a>
+              <a routerLink="/lien-he" class="btn btn-outline-white">Tư vấn miễn phí</a>
+            </div>
+          </div>
+          <div class="hero-image">
+            <div class="hero-img-wrap">
+              <img [src]="slide.img" [alt]="slide.title" loading="eager">
+              <div class="hero-badge" [style.background]="slide.accent">
+                <span class="badge-icon">🏆</span>
+                <span>Số 1 Châu Á</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dots -->
+  <div class="hero-dots">
+    <button *ngFor="let s of slides; let i = index"
+            [class.active]="activeSlide() === i"
+            (click)="setSlide(i)"
+            class="hero-dot"></button>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="scroll-indicator">
+    <div class="scroll-line"></div>
+    <span>Cuộn xuống</span>
+  </div>
+</section>
+
+<!-- ===== STATS BAR ===== -->
+<section class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div *ngFor="let stat of stats" class="stat-item">
+        <span class="stat-value">{{ stat.value }}</span>
+        <span class="stat-label">{{ stat.label }}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section class="section features-section bg-cream">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Tại sao chọn PaintCo</span>
+      <h2 class="section-title">Công Nghệ Đỉnh Cao<br>Bảo Vệ Ngôi Nhà Bạn</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="features-grid">
+      <div *ngFor="let f of features" class="feature-card">
+        <div class="feature-icon">{{ f.icon }}</div>
+        <h3>{{ f.title }}</h3>
+        <p>{{ f.desc }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURED PRODUCTS ===== -->
+<section class="section products-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Sản phẩm nổi bật</span>
+      <h2 class="section-title">Dòng Sản Phẩm Cao Cấp</h2>
+      <p class="section-desc">Khám phá các sản phẩm sơn hàng đầu với công nghệ tiên tiến nhất từ PaintCo</p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="products-grid">
+      <div *ngFor="let p of featuredProducts()" class="product-card card" [routerLink]="['/san-pham', p.id]">
+        <div class="product-img">
+          <img [src]="p.imageUrl || 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=500'" [alt]="p.nameVi || p.name">
+          <div class="product-overlay">
+            <button class="btn btn-white btn-sm">Xem chi tiết</button>
+          </div>
+          <div class="product-badge" *ngIf="p.isFeatured">Nổi bật</div>
+        </div>
+        <div class="product-info">
+          <span class="product-cat">{{ p.category?.nameVi || 'Sơn cao cấp' }}</span>
+          <h3>{{ p.nameVi || p.name }}</h3>
+          <p>{{ p.shortDesc }}</p>
+          <div class="product-footer">
+            <a [routerLink]="['/san-pham', p.id]" class="product-link">
+              Xem chi tiết
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-cta">
+      <a routerLink="/san-pham" class="btn btn-outline">Xem tất cả sản phẩm</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COLORS ===== -->
+<section class="section colors-section" style="background: var(--black);">
+  <div class="container">
+    <div class="section-header" style="color:white">
+      <span class="section-label" style="color:#C9A84C">Bảng màu</span>
+      <h2 class="section-title" style="color:white">Hơn 2000 Màu Sắc<br>Tuyệt Đẹp</h2>
+      <p class="section-desc" style="color:rgba(255,255,255,.6)">Chọn màu sơn hoàn hảo từ thư viện màu sắc phong phú của chúng tôi</p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="colors-palette">
+      <div *ngFor="let c of trendingColors()" class="color-swatch"
+           [style.background]="c.hex"
+           [title]="c.nameVi + ' - ' + c.colorCode">
+        <div class="swatch-info">
+          <span class="swatch-code">{{ c.colorCode }}</span>
+          <span class="swatch-name">{{ c.nameVi }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-cta">
+      <a routerLink="/mau-sac" class="btn btn-white">Xem toàn bộ bảng màu</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROMO BANNER ===== -->
+<section class="promo-banner">
+  <div class="container">
+    <div class="promo-inner">
+      <div class="promo-text">
+        <span class="section-label">Ưu đãi đặc biệt</span>
+        <h2>Miễn Phí Tư Vấn Màu Sắc<br>& Tính Toán Lượng Sơn</h2>
+        <p>Đội ngũ chuyên gia PaintCo sẵn sàng hỗ trợ bạn chọn màu sắc và tính toán lượng sơn cần thiết hoàn toàn miễn phí.</p>
+        <a routerLink="/lien-he" class="btn btn-primary">Đăng ký ngay</a>
+      </div>
+      <div class="promo-visual">
+        <div class="promo-circles">
+          <div class="circle c1"></div>
+          <div class="circle c2"></div>
+          <div class="circle c3"></div>
+          <div class="promo-icon">🎨</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== NEWS ===== -->
+<section class="section news-section bg-cream">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Tin tức & Xu hướng</span>
+      <h2 class="section-title">Câu Chuyện Màu Sắc</h2>
+      <p class="section-desc">Cảm hứng thiết kế, xu hướng màu sắc và bí quyết sơn nhà đẹp</p>
+      <div class="divider"></div>
+    </div>
+
+    <div class="news-grid">
+      <a *ngFor="let n of featuredNews(); let i = index"
+         [routerLink]="['/tin-tuc', n.slug]"
+         class="news-card card"
+         [class.news-featured]="i === 0">
+        <div class="news-img">
+          <img [src]="n.imageUrl" [alt]="n.title">
+          <span class="news-cat">{{ n.category }}</span>
+        </div>
+        <div class="news-body">
+          <h3>{{ n.title }}</h3>
+          <p>{{ n.excerpt }}</p>
+          <span class="news-link">Đọc tiếp →</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="section-cta">
+      <a routerLink="/tin-tuc" class="btn btn-outline">Xem tất cả tin tức</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA FINAL ===== -->
+<section class="cta-final">
+  <div class="container">
+    <div class="cta-content">
+      <h2>Sẵn Sàng Đổi Mới Ngôi Nhà?</h2>
+      <p>Liên hệ ngay để được tư vấn miễn phí và nhận báo giá tốt nhất từ PaintCo</p>
+      <div class="cta-actions">
+        <a routerLink="/lien-he" class="btn btn-primary">Liên hệ ngay</a>
+        <a href="tel:18008555" class="btn btn-outline-white">📞 1800 8555</a>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,173 @@
+.header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s ease;
+  height: 68px;
+  &.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,.1); border-bottom-color: var(--gray-200); }
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 68px; gap: 12px;
+}
+
+/* ── Logo ── */
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+.logo-icon {
+  width: 38px; height: 38px; background: var(--red); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  span { color: white; font-family: var(--font-display); font-size: 1.3rem; font-weight: 900; }
+}
+.logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+.logo-brand   { font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; color: var(--black); }
+.logo-tagline { font-size: 0.6rem; font-weight: 600; color: var(--red); letter-spacing: 2px; text-transform: uppercase; }
+
+/* ── Desktop nav (hidden by default, shown ≥1024px) ── */
+.nav-desktop  { display: none; align-items: center; gap: 2px; flex: 1; justify-content: center; }
+.nav-link {
+  padding: 7px 12px; border-radius: 8px; font-size: 0.875rem; font-weight: 500;
+  color: var(--gray-800); transition: all 0.2s; white-space: nowrap;
+  &:hover  { color: var(--red); background: rgba(200,16,46,.05); }
+  &.active { color: var(--red); font-weight: 700; }
+}
+
+/* ── Actions ── */
+.header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.cta-btn { display: none; }
+
+/* ── Hamburger (shown by default, hidden ≥1024px) ── */
+.hamburger {
+  display: flex; flex-direction: column; justify-content: center; gap: 5px;
+  width: 40px; height: 40px;
+  background: none; border: none; cursor: pointer; padding: 8px;
+  border-radius: 8px; transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  &:hover { background: rgba(200,16,46,.06); }
+  span {
+    display: block; width: 22px; height: 2px; background: var(--black);
+    border-radius: 2px; transition: all 0.3s ease; pointer-events: none;
+  }
+  &.open {
+    span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  }
+}
+
+/* ── Mobile menu (default: off-screen to the right) ── */
+.mobile-menu {
+  position: fixed;
+  top: 68px; left: 0; right: 0; bottom: 0;
+  background: white;
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;           /* ALWAYS flex — never display:none */
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 999;
+  -webkit-overflow-scrolling: touch;
+  /* Slide in when .open */
+  &.open { transform: translateX(0); }
+  nav { display: flex; flex-direction: column; }
+}
+.mobile-link {
+  display: block; padding: 18px 20px; font-size: 1rem; font-weight: 500;
+  color: var(--gray-800); border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s; text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  &:hover, &.active { color: var(--red); background: rgba(200,16,46,.04); padding-left: 26px; }
+  &.active { font-weight: 700; }
+}
+.mobile-cta { padding: 20px; }
+
+.header-spacer { height: 68px; }
+
+/* ─────────────── RESPONSIVE ─────────────── */
+
+/* xs: < 480px */
+@media (max-width: 479px) {
+  .header { height: 60px; }
+  .header-inner { height: 60px; }
+  .header-spacer { height: 60px; }
+  .mobile-menu { top: 60px; }
+  .logo-tagline { display: none; }
+  .logo-brand { font-size: 1.1rem; }
+  .logo-icon { width: 34px; height: 34px; }
+}
+
+/* sm: 480–767px */
+@media (min-width: 480px) and (max-width: 767px) {
+  .logo-tagline { display: none; }
+}
+
+/* md: 768–1023px */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* tagline visible */
+}
+
+/* lg+: ≥ 1024px — desktop */
+@media (min-width: 1024px) {
+  /* Show desktop nav, hide hamburger & mobile menu */
+  .nav-desktop { display: flex; }
+  .cta-btn     { display: inline-flex; }
+  .hamburger   { display: none; }
+
+  /* Push mobile-menu completely off-screen and disable interaction */
+  .mobile-menu {
+    pointer-events: none;
+    transform: translateX(100%) !important;
+    visibility: hidden;
+  }
+}
+
+/* xl: ≥ 1280px */
+@media (min-width: 1280px) {
+  .nav-link { padding: 8px 14px; font-size: 0.9rem; }
+}
+
+/* ── Overlay ── */
+.menu-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 998;
+  background: rgba(0,0,0,.45);
+  opacity: 0; transition: opacity 0.32s ease;
+  &.visible { opacity: 1; }
+}
+
+/* Mobile-specific: show overlay + slide-in menu */
+@media (max-width: 1023px) {
+  .menu-overlay { display: block; }
+  .mobile-menu {
+    /* drawer from right: 85% width max 320px */
+    left: auto;
+    width: min(85vw, 320px);
+    box-shadow: -4px 0 24px rgba(0,0,0,.15);
+  }
+}
+
+@media (max-width: 479px) {
+  .mobile-menu { width: 100%; }
+}
+
+/* Mobile menu header */
+.mobile-menu-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid #f0f0f0;
+  .logo { gap: 8px; }
+  .logo-brand { font-size: 1.1rem; font-weight: 800; }
+}
+.menu-close-btn {
+  width: 36px; height: 36px; border: none; background: #f5f5f5;
+  border-radius: 50%; cursor: pointer; font-size: 1rem; color: #555;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  &:hover { background: #ffe0e3; color: var(--red); }
+}
+
+/* Admin link in mobile */
+.admin-link {
+  display: block; text-align: center; margin-top: 12px;
+  font-size: 0.82rem; color: var(--gray-400); text-decoration: none;
+  &:hover { color: var(--red); }
+}

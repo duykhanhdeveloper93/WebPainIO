@@ -1,0 +1,4 @@
+.unread-row td { background: rgba(200,16,46,.02); }
+.sender-cell { display:flex;align-items:center;gap:10px; }
+.sender-avatar { width:32px;height:32px;background:#C8102E;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:.8rem;flex-shrink:0; }
+.msg-preview { font-size:.8rem;color:#666;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }

@@ -1,0 +1,53 @@
+# Render Blueprint — deploy toàn bộ PaintCo
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  # ── NestJS Backend ──────────────────────────────
+  - type: web
+    name: paintco-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: node dist/main
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_HOST
+        sync: false   # Nhập tay khi deploy
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_DATABASE
+        value: paintco_db
+      - key: JWT_SECRET
+        generateValue: true   # Render tự tạo random secret
+      - key: FRONTEND_URL
+        fromService:
+          name: paintco-frontend
+          type: web
+          property: host
+    healthCheckPath: /api/v1/products
+
+  # ── Angular Frontend (Static Site) ──────────────
+  - type: web
+    name: paintco-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist/paintco-frontend/browser
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://paintco-backend.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html

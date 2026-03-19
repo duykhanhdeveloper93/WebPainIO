@@ -1,0 +1,95 @@
+<!-- Page header -->
+<div class="page-hero">
+  <div class="container">
+    <span class="section-label">Danh mục sản phẩm</span>
+    <h1>Sản Phẩm PaintCo</h1>
+    <p>Khám phá dòng sơn cao cấp với công nghệ tiên tiến nhất</p>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-bar">
+  <div class="container">
+    <div class="filters-inner">
+      <div class="cat-filters">
+        <button class="filter-btn" [class.active]="activeCategory === ''" (click)="filterByCategory('')">
+          Tất cả
+        </button>
+        <button *ngFor="let c of categories()"
+                class="filter-btn"
+                [class.active]="activeCategory === c.slug"
+                (click)="filterByCategory(c.slug)">
+          {{ c.nameVi }}
+        </button>
+      </div>
+      <div class="search-wrap">
+        <input class="form-control search-input" type="text"
+               placeholder="Tìm kiếm sản phẩm..."
+               [(ngModel)]="searchQuery"
+               (keyup.enter)="onSearch()">
+        <button class="search-btn" (click)="onSearch()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Products grid -->
+<section class="section">
+  <div class="container">
+    <!-- Loading -->
+    <div *ngIf="loading()" class="loading-grid">
+      <div *ngFor="let _ of [1,2,3,4,5,6,7,8]" class="skeleton-card">
+        <div class="skeleton img"></div>
+        <div class="skeleton-body">
+          <div class="skeleton line short"></div>
+          <div class="skeleton line"></div>
+          <div class="skeleton line medium"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div *ngIf="!loading()" class="products-grid">
+      <div *ngFor="let p of products()" class="product-card card" [routerLink]="['/san-pham', p.id]">
+        <div class="product-img">
+          <img [src]="p.imageUrl" [alt]="p.nameVi || p.name" loading="lazy">
+          <div class="product-overlay">
+            <a [routerLink]="['/san-pham', p.id]" class="btn btn-white btn-sm">Xem chi tiết</a>
+          </div>
+          <span class="product-badge" *ngIf="p.isFeatured">Nổi bật</span>
+        </div>
+        <div class="product-body">
+          <span class="product-cat">{{ p.category?.nameVi || 'Sơn cao cấp' }}</span>
+          <h3>{{ p.nameVi || p.name }}</h3>
+          <p>{{ p.shortDesc }}</p>
+          <div class="product-meta">
+            <span *ngIf="p.coverage"><strong>Độ phủ:</strong> {{ p.coverage }}</span>
+            <span *ngIf="p.finish"><strong>Bề mặt:</strong> {{ p.finish }}</span>
+          </div>
+          <div class="product-price" *ngIf="p.priceRange">{{ p.priceRange }}</div>
+          <a [routerLink]="['/san-pham', p.id]" class="product-link">
+            Xem chi tiết
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!loading() && products().length === 0" class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>Không tìm thấy sản phẩm</h3>
+      <p>Thử tìm kiếm với từ khóa khác hoặc chọn danh mục khác</p>
+      <button class="btn btn-primary" (click)="filterByCategory('')">Xem tất cả</button>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages() > 1">
+      <button class="page-btn" [disabled]="page() === 1" (click)="changePage(page() - 1)">‹</button>
+      <button *ngFor="let p of getPages()" class="page-btn" [class.active]="page() === p" (click)="changePage(p)">{{ p }}</button>
+      <button class="page-btn" [disabled]="page() === totalPages()" (click)="changePage(page() + 1)">›</button>
+    </div>
+  </div>
+</section>

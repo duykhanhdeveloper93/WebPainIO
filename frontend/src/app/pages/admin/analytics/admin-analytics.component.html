@@ -1,0 +1,143 @@
+<div class="analytics-page">
+
+  <!-- KPI cards -->
+  <div class="kpi-grid" *ngIf="overview()">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:rgba(200,16,46,.1)">📦</div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ overview().products }}</div>
+        <div class="kpi-label">Sản phẩm</div>
+      </div>
+      <a routerLink="/admin/products" class="kpi-link">Chi tiết →</a>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:rgba(33,150,243,.1)">📰</div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ overview().news }}</div>
+        <div class="kpi-label">Bài viết</div>
+      </div>
+      <a routerLink="/admin/news" class="kpi-link">Chi tiết →</a>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:rgba(76,175,80,.1)">📩</div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ overview().contacts }}</div>
+        <div class="kpi-label">Liên hệ</div>
+        <div class="kpi-sub" *ngIf="overview().unreplied > 0">
+          {{ overview().unreplied }} chưa trả lời
+        </div>
+      </div>
+      <a routerLink="/admin/contacts" class="kpi-link">Chi tiết →</a>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:rgba(201,168,76,.1)">🎨</div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ overview().colors }}</div>
+        <div class="kpi-label">Màu sắc</div>
+      </div>
+      <a routerLink="/admin/colors" class="kpi-link">Chi tiết →</a>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:rgba(156,39,176,.1)">💬</div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ overview().sessions }}</div>
+        <div class="kpi-label">Phiên chat</div>
+        <div class="kpi-sub live" *ngIf="overview().openChats > 0">
+          {{ overview().openChats }} đang mở
+        </div>
+      </div>
+      <a routerLink="/admin/chat" class="kpi-link">Vào chat →</a>
+    </div>
+    <div class="kpi-card highlight">
+      <div class="kpi-icon" style="background:rgba(255,87,34,.1)">📈</div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ overview().weekContacts }}</div>
+        <div class="kpi-label">Liên hệ 7 ngày qua</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <!-- Contacts bar chart (30 days) -->
+    <div class="chart-card wide">
+      <div class="chart-header">
+        <h3>Liên hệ 30 ngày gần đây</h3>
+        <span class="chart-sub">Số lượt liên hệ theo ngày</span>
+      </div>
+      <div class="bar-chart" *ngIf="contactChart().length > 0; else noData">
+        <div *ngFor="let d of contactChart()" class="bar-item">
+          <div class="bar-wrap">
+            <div class="bar-fill" [style.height]="getBarWidth(d.count)" [title]="d.count + ' liên hệ'">
+              <span class="bar-val">{{ d.count }}</span>
+            </div>
+          </div>
+          <div class="bar-label">{{ d.date | date:'dd/MM' }}</div>
+        </div>
+      </div>
+      <ng-template #noData>
+        <div class="no-data">Chưa có dữ liệu</div>
+      </ng-template>
+    </div>
+
+    <!-- Products by category donut-style -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Sản phẩm theo danh mục</h3>
+      </div>
+      <div class="donut-chart" *ngIf="productsByCat().length > 0; else noData2">
+        <div *ngFor="let c of productsByCat(); let i = index" class="donut-row">
+          <div class="donut-color" [style.background]="pieColors[i % pieColors.length]"></div>
+          <div class="donut-label">{{ c.category || 'Chưa phân loại' }}</div>
+          <div class="donut-bar-wrap">
+            <div class="donut-bar" [style.width]="getPiePercent(c.count) + '%'"
+                 [style.background]="pieColors[i % pieColors.length]"></div>
+          </div>
+          <div class="donut-count">{{ c.count }}</div>
+        </div>
+      </div>
+      <ng-template #noData2><div class="no-data">Chưa có dữ liệu</div></ng-template>
+    </div>
+
+    <!-- Top news -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Bài viết được đọc nhiều nhất</h3>
+      </div>
+      <div class="top-list" *ngIf="topNews().length > 0; else noData3">
+        <div *ngFor="let n of topNews(); let i = index" class="top-item">
+          <div class="top-rank" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+            {{ i + 1 }}
+          </div>
+          <div class="top-info">
+            <div class="top-title">{{ n.title }}</div>
+            <div class="top-sub">{{ n.category }}</div>
+          </div>
+          <div class="top-views">{{ n.viewCount || 0 }} views</div>
+        </div>
+      </div>
+      <ng-template #noData3><div class="no-data">Chưa có dữ liệu</div></ng-template>
+    </div>
+
+    <!-- Recent contacts -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Liên hệ gần đây</h3>
+        <a routerLink="/admin/contacts" class="chart-link">Xem tất cả →</a>
+      </div>
+      <div class="contact-list" *ngIf="recentContacts().length > 0; else noData4">
+        <div *ngFor="let c of recentContacts()" class="contact-item">
+          <div class="contact-av">{{ c.name[0] }}</div>
+          <div class="contact-info">
+            <div class="contact-name">{{ c.name }}</div>
+            <div class="contact-msg">{{ c.message }}</div>
+          </div>
+          <span class="contact-badge" [class.replied]="c.replied">
+            {{ c.replied ? '✅' : '🔴' }}
+          </span>
+        </div>
+      </div>
+      <ng-template #noData4><div class="no-data">Chưa có liên hệ</div></ng-template>
+    </div>
+
+  </div>
+</div>

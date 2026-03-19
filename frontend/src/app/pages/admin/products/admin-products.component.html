@@ -1,0 +1,126 @@
+<div class="admin-page">
+  <div class="page-header">
+    <div>
+      <h2>Quản lý Sản phẩm</h2>
+      <p>{{ products().length }} sản phẩm</p>
+    </div>
+    <button class="btn-add" (click)="openCreate()">➕ Thêm sản phẩm</button>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" *ngIf="toast()">{{ toast() }}</div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div *ngIf="loading()" class="loading-state">Đang tải...</div>
+    <table *ngIf="!loading()">
+      <thead>
+        <tr>
+          <th>Sản phẩm</th>
+          <th>Danh mục</th>
+          <th>Giá</th>
+          <th>Nổi bật</th>
+          <th>Trạng thái</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of products()">
+          <td>
+            <div class="product-cell">
+              <img [src]="p.imageUrl" [alt]="p.nameVi" class="prod-thumb">
+              <div>
+                <div class="prod-name">{{ p.nameVi || p.name }}</div>
+                <div class="prod-sub">{{ p.shortDesc }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="tag">{{ p.category?.nameVi || '—' }}</span></td>
+          <td class="price-col">{{ p.priceRange || '—' }}</td>
+          <td><span class="badge" [class.yes]="p.isFeatured">{{ p.isFeatured ? '⭐ Có' : 'Không' }}</span></td>
+          <td><span class="badge" [class.active]="p.isActive">{{ p.isActive ? 'Hiện' : 'Ẩn' }}</span></td>
+          <td class="actions">
+            <button class="btn-edit" (click)="openEdit(p)">✏️ Sửa</button>
+            <button class="btn-del" (click)="delete(p.id)">🗑️</button>
+          </td>
+        </tr>
+        <tr *ngIf="products().length === 0">
+          <td colspan="6" class="empty">Chưa có sản phẩm nào</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal()" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ editingId() ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới' }}</h3>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tên tiếng Anh *</label>
+          <input class="form-control" [(ngModel)]="form.name" placeholder="SpotLess Pro">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tên tiếng Việt *</label>
+          <input class="form-control" [(ngModel)]="form.nameVi" placeholder="Sơn Nội Thất SpotLess Pro">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mô tả ngắn</label>
+        <input class="form-control" [(ngModel)]="form.shortDesc" placeholder="Kháng khuẩn 99%, chống bám bẩn...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mô tả đầy đủ</label>
+        <textarea class="form-control" [(ngModel)]="form.description" rows="3" placeholder="Nội dung chi tiết..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">URL ảnh</label>
+          <input class="form-control" [(ngModel)]="form.imageUrl" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Danh mục</label>
+          <select class="form-control" [(ngModel)]="form.categoryId">
+            <option [value]="null">-- Chọn danh mục --</option>
+            <option *ngFor="let c of categories()" [value]="c.id">{{ c.nameVi }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Giá tham khảo</label>
+          <input class="form-control" [(ngModel)]="form.priceRange" placeholder="350.000 - 550.000 VNĐ">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Độ phủ</label>
+          <input class="form-control" [(ngModel)]="form.coverage" placeholder="8-10 m²/lít">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bề mặt</label>
+          <select class="form-control" [(ngModel)]="form.finish">
+            <option>Mờ</option><option>Bán bóng</option><option>Bóng</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-checks">
+        <label class="check-label">
+          <input type="checkbox" [(ngModel)]="form.isFeatured"> ⭐ Sản phẩm nổi bật
+        </label>
+        <label class="check-label">
+          <input type="checkbox" [(ngModel)]="form.isActive"> 👁️ Hiển thị
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeModal()">Hủy</button>
+      <button class="btn-save" (click)="save()" [disabled]="saving()">
+        {{ saving() ? 'Đang lưu...' : (editingId() ? 'Cập nhật' : 'Tạo mới') }}
+      </button>
+    </div>
+  </div>
+</div>

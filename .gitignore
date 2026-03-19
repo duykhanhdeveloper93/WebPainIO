@@ -1,0 +1,26 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Build
+dist/
+.angular/
+
+# Env
+.env
+*.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (production sẽ dùng S3/cloud)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/

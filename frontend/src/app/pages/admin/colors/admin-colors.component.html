@@ -1,0 +1,64 @@
+<div class="admin-page">
+  <div class="page-header">
+    <div><h2>Quản lý Bảng màu</h2><p>{{ colors().length }} màu sắc</p></div>
+    <button class="btn-add" (click)="openCreate()">➕ Thêm màu</button>
+  </div>
+  <div class="toast" *ngIf="toast()">{{ toast() }}</div>
+
+  <div class="colors-grid">
+    <div *ngFor="let c of colors()" class="color-item">
+      <div class="color-swatch" [style.background]="c.hex">
+        <div class="swatch-actions">
+          <button (click)="openEdit(c)">✏️</button>
+          <button (click)="delete(c.id)">🗑️</button>
+        </div>
+        <span class="trending-tag" *ngIf="c.isTrending">🔥</span>
+      </div>
+      <div class="color-meta">
+        <span class="color-code">{{ c.colorCode }}</span>
+        <span class="color-name">{{ c.nameVi || c.name }}</span>
+        <span class="color-family">{{ c.family }}</span>
+      </div>
+    </div>
+    <div *ngIf="colors().length === 0 && !loading()" class="empty" style="grid-column:1/-1;text-align:center;padding:40px;color:#aaa">Chưa có màu nào</div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showModal()" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()" style="max-width:480px">
+    <div class="modal-header">
+      <h3>{{ editingId() ? 'Chỉnh sửa màu' : 'Thêm màu mới' }}</h3>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tên tiếng Việt *</label><input class="form-control" [(ngModel)]="form.nameVi" placeholder="Trắng Ngà"></div>
+        <div class="form-group"><label class="form-label">Tên tiếng Anh</label><input class="form-control" [(ngModel)]="form.name" placeholder="Ivory White"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Mã màu HEX *</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="color" [(ngModel)]="form.hex" style="width:44px;height:38px;border:1px solid #ddd;border-radius:8px;padding:2px;cursor:pointer">
+            <input class="form-control" [(ngModel)]="form.hex" placeholder="#FFFFF0" style="flex:1">
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Mã sản phẩm</label><input class="form-control" [(ngModel)]="form.colorCode" placeholder="PC-001"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Họ màu</label>
+        <select class="form-control" [(ngModel)]="form.family">
+          <option *ngFor="let f of families" [value]="f">{{ f }}</option>
+        </select>
+      </div>
+      <div class="form-checks">
+        <label class="check-label"><input type="checkbox" [(ngModel)]="form.isTrending"> 🔥 Xu hướng</label>
+        <label class="check-label"><input type="checkbox" [(ngModel)]="form.isActive"> 👁️ Hiển thị</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeModal()">Hủy</button>
+      <button class="btn-save" (click)="save()" [disabled]="saving()">{{ saving() ? 'Đang lưu...' : 'Lưu' }}</button>
+    </div>
+  </div>
+</div>

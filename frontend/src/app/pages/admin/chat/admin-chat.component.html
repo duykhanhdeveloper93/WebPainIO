@@ -1,0 +1,163 @@
+<div class="chat-admin">
+
+  <!-- Sessions list -->
+  <div class="sessions-panel">
+    <div class="sessions-header">
+      <h3>Hộp thư</h3>
+      <span class="unread-badge" *ngIf="chat.totalUnread() > 0">{{ chat.totalUnread() }}</span>
+    </div>
+    <div class="sessions-list">
+      <div *ngIf="chat.sessions().length === 0" class="sess-empty">
+        <div style="font-size:2.5rem">&#128172;</div>
+        <p>Chưa có cuộc trò chuyện</p>
+      </div>
+      <div *ngFor="let s of chat.sessions()"
+           class="sess-item" [class.active]="activeSession()?.sessionId === s.sessionId"
+           [class.has-unread]="s.unreadCount > 0" (click)="selectSession(s)">
+        <div class="sess-av">{{ getInitial(s.customerName) }}</div>
+        <div class="sess-info">
+          <div class="sess-name">{{ s.customerName || 'Khách hàng' }}</div>
+          <div class="sess-last">{{ s.lastMessage || 'Bắt đầu trò chuyện' }}</div>
+        </div>
+        <div class="sess-meta">
+          <span class="unread-dot" *ngIf="s.unreadCount > 0">{{ s.unreadCount }}</span>
+          <span class="sess-status" [class.open]="s.status === 'open'">
+            {{ s.status === 'open' ? 'Mở' : 'Đóng' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat panel -->
+  <div class="chat-panel" *ngIf="activeSession(); else noneSelected">
+
+    <!-- Header -->
+    <div class="panel-hdr">
+      <div class="panel-user">
+        <div class="panel-av">{{ getInitial(activeSession()!.customerName) }}</div>
+        <div>
+          <div class="panel-name">{{ activeSession()!.customerName || 'Khách hàng' }}</div>
+          <div class="panel-email">{{ activeSession()!.customerEmail || 'Không có email' }}</div>
+        </div>
+      </div>
+      <div class="panel-actions">
+        <span class="status-pill" [class.open]="activeSession()!.status === 'open'">
+          {{ activeSession()!.status === 'open' ? 'Đang mở' : 'Đã đóng' }}
+        </span>
+        <button class="call-btn audio" *ngIf="activeSession()!.status === 'open'" (click)="startAudioCall()" title="Gọi thoại">
+          &#128222; Gọi thoại
+        </button>
+        <button class="call-btn video" *ngIf="activeSession()!.status === 'open'" (click)="startVideoCall()" title="Video call">
+          &#128249; Video
+        </button>
+        <button class="close-btn" *ngIf="activeSession()!.status === 'open'" (click)="closeSession(activeSession()!)">
+          Đóng phiên
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages" #msgContainer>
+      <div *ngIf="chat.messages().length === 0" class="no-msgs">
+        <span style="font-size:2rem">&#128075;</span>
+        <p>Chưa có tin nhắn. Hãy chào khách hàng!</p>
+      </div>
+
+      <div *ngFor="let msg of chat.messages()" class="msg-row"
+           [class.msg-admin]="isMe(msg)" [class.msg-customer]="!isMe(msg)">
+        <div class="msg-av cust-av" *ngIf="!isMe(msg)">{{ getInitial(msg.senderName) }}</div>
+        <div class="msg-bubble">
+          <div class="msg-sender" *ngIf="!isMe(msg)">{{ msg.senderName || 'Khách' }}</div>
+
+          <!-- Text -->
+          <div class="msg-text" *ngIf="msg.msgType === 'text'">{{ msg.message }}</div>
+          <!-- Emoji -->
+          <div class="msg-emoji" *ngIf="msg.msgType === 'emoji'">{{ msg.message }}</div>
+          <!-- Sticker -->
+          <div class="msg-sticker" *ngIf="msg.msgType === 'sticker'">
+            <img [src]="msg.fileUrl" [alt]="msg.message" loading="lazy">
+            <span>{{ msg.message }}</span>
+          </div>
+          <!-- Image -->
+          <div class="msg-image" *ngIf="msg.msgType === 'image'">
+            <a [href]="msg.fileUrl" target="_blank"><img [src]="msg.fileUrl" [alt]="msg.fileName" loading="lazy"></a>
+          </div>
+          <!-- File -->
+          <a class="msg-file" *ngIf="msg.msgType === 'file'" [href]="msg.fileUrl" target="_blank" download>
+            <span class="file-ico">&#128196;</span>
+            <div class="file-info">
+              <div class="file-name">{{ msg.fileName }}</div>
+              <div class="file-sz">{{ formatSize(msg.fileSize) }}</div>
+            </div>
+            <span class="file-dl">&#11015;</span>
+          </a>
+
+          <div class="msg-time">{{ msg.createdAt | date:'HH:mm dd/MM' }}</div>
+        </div>
+        <div class="msg-av admin-av" *ngIf="isMe(msg)">A</div>
+      </div>
+
+      <!-- Typing -->
+      <div class="msg-row msg-customer" *ngIf="chat.isTyping()">
+        <div class="msg-av cust-av">K</div>
+        <div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>
+      </div>
+    </div>
+
+    <!-- Emoji panel -->
+    <div class="emoji-panel" *ngIf="showEmoji()">
+      <div class="emoji-grid">
+        <button *ngFor="let e of emojis" class="emoji-btn" (click)="sendEmoji(e)">{{ e }}</button>
+      </div>
+    </div>
+
+    <!-- Sticker panel -->
+    <div class="sticker-panel" *ngIf="showSticker()">
+      <div class="sticker-grid">
+        <div *ngFor="let s of stickers" class="sticker-item" (click)="sendSticker(s)">
+          <img [src]="s.url" [alt]="s.label" loading="lazy">
+          <span>{{ s.label }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="input-area" [class.disabled-area]="activeSession()!.status === 'closed'">
+      <div class="toolbar">
+        <button class="tool-btn" (click)="togglePanel('emoji')" [class.active]="showEmoji()" title="Emoji">&#128512;</button>
+        <button class="tool-btn" (click)="togglePanel('sticker')" [class.active]="showSticker()" title="Sticker GIF">&#127752;</button>
+        <button class="tool-btn" (click)="triggerFile()" title="Gửi file / ảnh">&#128206;</button>
+        <input type="file" #fileInput class="hidden-file" (change)="onFileSelected($event)"
+               accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip">
+        <span class="uploading-tag" *ngIf="uploading()">Đang tải lên...</span>
+      </div>
+      <div class="input-row">
+        <textarea
+          [(ngModel)]="input"
+          [placeholder]="activeSession()!.status === 'closed' ? 'Phiên đã đóng' : 'Nhập tin nhắn... (Enter để gửi)'"
+          [disabled]="activeSession()!.status === 'closed'"
+          (keydown)="onKeydown($event)"
+          rows="2">
+        </textarea>
+        <button class="send-btn" (click)="send()"
+                [disabled]="!input.trim() || activeSession()!.status === 'closed'">
+          &#10148; Gửi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- No session selected -->
+  <ng-template #noneSelected>
+    <div class="none-selected">
+      <div style="font-size:4rem;margin-bottom:12px">&#128172;</div>
+      <h3>Chọn một cuộc trò chuyện</h3>
+      <p>Chọn từ danh sách để hỗ trợ khách hàng</p>
+    </div>
+  </ng-template>
+
+</div>
+
+<!-- WebRTC Call Modal -->
+<app-call-modal *ngIf="activeSession()" [sessionId]="activeSession()!.sessionId" [myName]="adminName()" role="admin"></app-call-modal>
