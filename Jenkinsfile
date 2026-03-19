@@ -1,19 +1,21 @@
+```groovy
 pipeline {
     agent any
 
     environment {
-        APP_DIR = '/opt/paintco'
-        GIT_BRANCH = 'develop'
+        APP_DIR = '/opt/paintco'     // 📂 Thư mục deploy trên VPS
+        GIT_BRANCH = 'develop'      // 🌿 Branch cần deploy
     }
 
     triggers {
-        githubPush()
+        githubPush()                // 🚀 Auto deploy khi push code
     }
 
     stages {
 
-        stage('📥 Checkout') {
+        stage('📥 Checkout Code') {
             steps {
+                // 📥 Lấy code từ GitHub
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: "*/${GIT_BRANCH}"]],
@@ -24,33 +26,36 @@ pipeline {
             }
         }
 
-        stage('📦 Deploy Local VPS') {
+        stage('📦 Deploy to VPS') {
             steps {
                 sh '''
-                    echo "📂 Check directory..."
-                    if [ ! -d "$APP_DIR" ]; then
-                        echo "➡️ Creating $APP_DIR"
-                        mkdir -p "$APP_DIR"
-                    else
-                        echo "➡️ Directory exists"
-                    fi
+                    echo "📂 Ensure app directory exists..."
+                    mkdir -p $APP_DIR
 
-                    echo "🧹 Clean old code..."
-                    rm -rf "$APP_DIR"/*
-
-                    echo "📦 Copy new code..."
-                    cp -r * "$APP_DIR"/
+                    echo "🔄 Sync code (không xoá file quan trọng)..."
+                    # rsync giúp:
+                    # - update code
+                    # - giữ lại .env, certbot, uploads
+                    rsync -av --delete \
+                      --exclude='.env.production' \
+                      --exclude='certbot' \
+                      --exclude='uploads' \
+                      ./ "$APP_DIR"/
 
                     cd "$APP_DIR"
 
-                    echo "🛑 Stop containers..."
+                    echo "🛑 Stop old containers..."
                     docker compose -f docker-compose.vps.yml down
 
-                    echo "🔨 Build..."
-                    docker compose -f docker-compose.vps.yml build --no-cache
+                    echo "📥 Pull latest images từ Docker Hub..."
+                    # ⚠️ Không build tại VPS nữa (chuẩn DevOps)
+                    docker compose -f docker-compose.vps.yml pull
 
-                    echo "🚀 Start..."
-                    docker compose -f docker-compose.vps.yml up -d
+                    echo "🚀 Start containers..."
+                    docker compose -f docker-compose.vps.yml up -d --remove-orphans
+
+                    echo "🧹 Cleanup Docker rác..."
+                    docker image prune -af
                 '''
             }
         }
@@ -58,18 +63,32 @@ pipeline {
         stage('❤️ Health Check') {
             steps {
                 script {
-                    echo "⏳ Waiting for app..."
-                    sleep 20
+                    echo "⏳ Waiting for app (retry)..."
 
-                    def status = sh(
-                        script: "curl -s -o /dev/null -w '%{http_code}' http://localhost/api/v1/products || echo '000'",
-                        returnStdout: true
-                    ).trim()
+                    // 🔁 Retry 10 lần (mỗi lần cách 5s)
+                    def success = false
+                    for (int i = 1; i <= 10; i++) {
 
-                    echo "Health: ${status}"
+                        def status = sh(
+                            script: """
+                            curl -k -s -o /dev/null -w '%{http_code}' https://nuocngavidai.duckdns.org/api/v1/products || echo '000'
+                            """,
+                            returnStdout: true
+                        ).trim()
 
-                    if (status != '200') {
-                        error("❌ App failed!")
+                        echo "🔍 Try ${i}: HTTP ${status}"
+
+                        if (status == '200') {
+                            success = true
+                            break
+                        }
+
+                        sleep 5
+                    }
+
+                    // ❌ Fail nếu không lên được
+                    if (!success) {
+                        error("❌ App failed after retries!")
                     }
                 }
             }
@@ -78,10 +97,11 @@ pipeline {
 
     post {
         success {
-            echo "✅ DEPLOY SUCCESS"
+            echo "✅ DEPLOY SUCCESS - App is live 🚀"
         }
         failure {
-            echo "❌ DEPLOY FAILED"
+            echo "❌ DEPLOY FAILED - Check logs ngay!"
         }
     }
 }
+```
