@@ -26,22 +26,22 @@ pipeline {
 
         stage('📦 Deploy Local VPS') {
             steps {
-                sh """
+                sh '''
                     echo "📂 Check directory..."
-                    if [ ! -d "${APP_DIR}" ]; then
-                        echo "➡️ Creating ${APP_DIR}"
-                        mkdir -p ${APP_DIR}
+                    if [ ! -d "$APP_DIR" ]; then
+                        echo "➡️ Creating $APP_DIR"
+                        mkdir -p "$APP_DIR"
                     else
                         echo "➡️ Directory exists"
                     fi
 
                     echo "🧹 Clean old code..."
-                    rm -rf ${APP_DIR:?}/*
+                    rm -rf "$APP_DIR"/*
 
                     echo "📦 Copy new code..."
-                    cp -r * ${APP_DIR}/
+                    cp -r * "$APP_DIR"/
 
-                    cd ${APP_DIR}
+                    cd "$APP_DIR"
 
                     echo "🛑 Stop containers..."
                     docker compose -f docker-compose.vps.yml down
@@ -51,7 +51,7 @@ pipeline {
 
                     echo "🚀 Start..."
                     docker compose -f docker-compose.vps.yml up -d
-                """
+                '''
             }
         }
 
