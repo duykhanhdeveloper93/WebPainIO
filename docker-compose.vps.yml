@@ -15,18 +15,12 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command: --default-authentication-plugin=mysql_native_password
     networks:
       - paintco_net
 
   backend:
-    # 👉 dùng image (production)
     image: duykhanh/paintco-backend:latest
-
-    # 👉 nếu muốn build tại VPS thì mở cái này
-    # build:
-    #   context: ./backend
-    #   dockerfile: Dockerfile
-
     container_name: paintco_backend
     restart: unless-stopped
     env_file: .env.production
@@ -40,14 +34,7 @@ services:
       - paintco_net
 
   frontend:
-    # 👉 dùng image (production)
     image: duykhanh/paintco-frontend:latest
-
-    # 👉 nếu muốn build tại VPS thì mở cái này
-    # build:
-    #   context: ./frontend
-    #   dockerfile: Dockerfile
-
     container_name: paintco_frontend
     restart: unless-stopped
     ports:
@@ -76,9 +63,16 @@ services:
 
   certbot:
     image: certbot/certbot
+    container_name: paintco_certbot
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
+    entrypoint: >
+      sh -c "trap exit TERM;
+             while :; do
+               certbot renew;
+               sleep 12h & wait $${!};
+             done;"
 
 volumes:
   mysql_data:
