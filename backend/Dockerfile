@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+RUN npm ci
 
 COPY . .
 
@@ -20,12 +20,17 @@ ENV NODE_ENV=production
 
 COPY package*.json ./
 
-RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi
+# chỉ cài dependency cần thiết
+RUN npm ci --omit=dev
 
+# copy build
 COPY --from=builder /app/dist ./dist
 
 # tạo folder upload
 RUN mkdir -p uploads
+
+# 🔥 giảm memory node
+ENV NODE_OPTIONS=--max-old-space-size=256
 
 EXPOSE 3000
 
