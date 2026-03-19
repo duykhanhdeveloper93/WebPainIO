@@ -27,13 +27,29 @@ pipeline {
         stage('📦 Deploy Local VPS') {
             steps {
                 sh """
-                    rm -rf ${APP_DIR}/*
+                    echo "📂 Check directory..."
+                    if [ ! -d "${APP_DIR}" ]; then
+                        echo "➡️ Creating ${APP_DIR}"
+                        mkdir -p ${APP_DIR}
+                    else
+                        echo "➡️ Directory exists"
+                    fi
+
+                    echo "🧹 Clean old code..."
+                    rm -rf ${APP_DIR:?}/*
+
+                    echo "📦 Copy new code..."
                     cp -r * ${APP_DIR}/
 
                     cd ${APP_DIR}
 
+                    echo "🛑 Stop containers..."
                     docker compose -f docker-compose.vps.yml down
+
+                    echo "🔨 Build..."
                     docker compose -f docker-compose.vps.yml build --no-cache
+
+                    echo "🚀 Start..."
                     docker compose -f docker-compose.vps.yml up -d
                 """
             }
@@ -42,6 +58,7 @@ pipeline {
         stage('❤️ Health Check') {
             steps {
                 script {
+                    echo "⏳ Waiting for app..."
                     sleep 20
 
                     def status = sh(
@@ -49,11 +66,22 @@ pipeline {
                         returnStdout: true
                     ).trim()
 
+                    echo "Health: ${status}"
+
                     if (status != '200') {
-                        error("App failed!")
+                        error("❌ App failed!")
                     }
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ DEPLOY SUCCESS"
+        }
+        failure {
+            echo "❌ DEPLOY FAILED"
         }
     }
 }
