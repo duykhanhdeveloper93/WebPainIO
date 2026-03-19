@@ -1,7 +1,6 @@
 version: '3.9'
 
 services:
-  # ── MySQL Database ──────────────────────────────────────
   mysql:
     image: mysql:8.0
     container_name: paintco_mysql
@@ -11,8 +10,6 @@ services:
       MYSQL_DATABASE: paintco_db
       MYSQL_USER: paintco
       MYSQL_PASSWORD: paintco123
-    ports:
-      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -28,7 +25,6 @@ services:
     networks:
       - paintco_net
 
-  # ── NestJS Backend ──────────────────────────────────────
   backend:
     build:
       context: ./backend
@@ -43,25 +39,15 @@ services:
       DB_USERNAME: paintco
       DB_PASSWORD: paintco123
       DB_DATABASE: paintco_db
-      JWT_SECRET: paintco-super-secret-jwt-key-change-in-prod
-      JWT_EXPIRES: 7d
-      FRONTEND_URL: http://localhost
-    ports:
-      - "3000:3000"
-    volumes:
-      - uploads_data:/app/uploads
+      JWT_SECRET: super-secret-key
     depends_on:
       mysql:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/v1/products"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+    volumes:
+      - uploads_data:/app/uploads
     networks:
       - paintco_net
 
-  # ── Angular Frontend ────────────────────────────────────
   frontend:
     build:
       context: ./frontend
@@ -73,7 +59,6 @@ services:
     networks:
       - paintco_net
 
-  # ── Nginx Reverse Proxy ─────────────────────────────────
   nginx:
     image: nginx:1.25-alpine
     container_name: paintco_nginx
@@ -90,10 +75,7 @@ services:
 
 volumes:
   mysql_data:
-    driver: local
   uploads_data:
-    driver: local
 
 networks:
   paintco_net:
-    driver: bridge
