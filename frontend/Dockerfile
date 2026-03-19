@@ -4,25 +4,24 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Tăng RAM cho Angular build
-ENV NODE_OPTIONS=--max-old-space-size=512
+ENV NODE_OPTIONS=--max-old-space-size=1024
 
 COPY package*.json ./
 
-# fallback nếu thiếu lock file
 RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 COPY . .
 
-RUN npm run build
+# build production nhẹ hơn
+RUN npm run build -- --configuration production --source-map=false
 
 # ---- Nginx serve ----
 FROM nginx:1.25-alpine
 
-# clear default nginx
 RUN rm -rf /usr/share/nginx/html/*
 
-# copy build
-COPY --from=builder /app/dist /usr/share/nginx/html
+# ⚠️ Angular thường nằm trong browser/
+COPY --from=builder /app/dist/paintco-frontend/browser /usr/share/nginx/html
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
